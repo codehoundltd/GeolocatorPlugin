@@ -29,6 +29,7 @@ namespace Plugin.Geolocator
         bool isListening;
         Position lastPosition;
         ListenerSettings listenerSettings;
+        bool usingHeading;
 
 		/// <summary>
 		/// Constructor for implementation
@@ -129,6 +130,11 @@ namespace Plugin.Geolocator
         public bool SupportsHeading => false;
 #endif
 
+#if __IOS__
+        public bool SupportsCourse => true;
+#else
+        public bool SupportsCourse => false;
+#endif
 
         /// <summary>
         /// Gets if geolocation is available on device
@@ -436,7 +442,8 @@ namespace Plugin.Geolocator
 #endif
 
 #if __IOS__
-            if (includeHeading && CLLocationManager.HeadingAvailable)
+            usingHeading = includeHeading && CLLocationManager.HeadingAvailable;
+            if (usingHeading)
                 manager.StartUpdatingHeading();
 #endif
 
@@ -540,6 +547,13 @@ namespace Plugin.Geolocator
 #if __IOS__ || __MACOS__
             if (location.Speed > -1)
                 p.Speed = location.Speed;
+#endif
+
+#if __IOS__
+            // Only update using the GPS course if
+            // heading updates are not being used
+            if (!usingHeading)
+                p.Heading = location.Course;
 #endif
 
             try
