@@ -552,7 +552,7 @@ namespace Plugin.Geolocator
 #if __IOS__
             // Only update using the GPS course if
             // heading updates are not being used
-            if (!usingHeading)
+            if (!usingHeading && location.Course > -1)
                 p.Heading = location.Course;
 #endif
 
